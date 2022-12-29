@@ -106,5 +106,3 @@ export const PausePlayer = async () => {
     },
   })
 }
-
-export const GetSpotifyDevices = async () => {}
