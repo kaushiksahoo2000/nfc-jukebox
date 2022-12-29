@@ -90,7 +90,7 @@ export const PlayPlayer = async (trackID) => {
       Authorization: `Bearer ${access_token}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ uris: ['spotify:track:1qyKIq8hw9yWkuPJ9ZjuvK'] }),
+    body: JSON.stringify({ uris: [trackID] }),
   })
 }
 

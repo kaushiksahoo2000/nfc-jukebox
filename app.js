@@ -2,6 +2,7 @@ import express from 'express'
 import { NFC } from 'nfc-pcsc'
 import pretty from './pretty-logger.js'
 import { GetCurrentlyPlaying, GetRecentlyPlayed, GetTopTracks, GetDevices, PausePlayer, PlayPlayer } from './spotify.js'
+import SONGS from './music.js'
 
 const nfc = new NFC()
 const app = express()
@@ -108,46 +109,16 @@ nfc.on('reader', async (reader) => {
 
   reader.on('card', async (card) => {
     pretty.info(`card detected`, reader, card)
-
-    // // example reading 4 bytes assuming containing 16bit integer
-    // // !!! note that we don't need 4 bytes - 16bit integer takes just 2 bytes !!!
-    // try {
-    //   // reader.read(blockNumber, length, blockSize = 4, packetSize = 16)
-    //   // - blockNumber - memory block number where to start reading
-    //   // - length - how many bytes to read
-    //   // - blockSize - 4 for MIFARE Ultralight, 16 for MIFARE Classic
-    //   // ! Caution! length must be divisible by blockSize (we have to read the whole block(s))
-
-    //   const data = await reader.read(4, 4)
-
-    //   pretty.info(`data read`, reader, data)
-
-    //   const payload = data.readInt16BE(0)
-
-    //   pretty.info(`data converted`, reader, payload)
-    // } catch (err) {
-    //   pretty.error(`error when reading data`, reader, err)
-    // }
-
-    // // example write 4 bytes containing 16bit integer
-    // // !!! note that we don't need 16 bytes - 16bit integer takes just 2 bytes !!!
-    // try {
-    //   // reader.write(blockNumber, data, blockSize = 4, packetSize = 16)
-    //   // - blockNumber - memory block number where to start writing
-    //   // - data - what to write
-    //   // - blockSize - 4 for MIFARE Ultralight, 16 for MIFARE Classic
-    //   // ! Caution! data.length must be divisible by blockSize (we have to write the whole block(s))
-
-    //   const data = Buffer.allocUnsafe(4).fill(0)
-    //   const randomNumber = Math.round(Math.random() * 1000)
-    //   data.writeInt16BE(randomNumber, 0)
-
-    //   await reader.write(4, data)
-
-    //   pretty.info(`data written`, reader, randomNumber, data)
-    // } catch (err) {
-    //   pretty.error(`error when writing data`, reader, err)
-    // }
+    const { uid } = card
+    const trackID = SONGS[uid]
+    console.log({ uid, trackID })
+    if (uid) {
+      try {
+        const resp = await PlayPlayer(trackID)
+      } catch (err) {
+        console.log(`ERROR: `, err)
+      }
+    }
   })
 
   reader.on('error', (err) => {
