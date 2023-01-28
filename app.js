@@ -20,6 +20,32 @@ app.get('/currentlyplaying', async (req, res) => {
   }
 })
 
+app.get('/current', async (req, res) => {
+  try {
+    const resp = await GetCurrentlyPlaying()
+    const current = await resp.json()
+    const {
+      item: {
+        name,
+        album: { artists, images },
+      },
+    } = current
+    const artistNames = artists.map((x) => x['name']).join(' - ')
+    const albumArt = images[1]['url']
+    // console.log(name)
+    // console.log(artistNames)
+    // console.log(albumArt)
+    res.json({
+      name,
+      artistNames,
+      albumArt,
+    })
+  } catch (err) {
+    console.log(`ERROR: `, err)
+    res.json({ error: `get recently played failed` })
+  }
+})
+
 app.get('/recentlyplayed', async (req, res) => {
   try {
     const resp = await GetRecentlyPlayed()
