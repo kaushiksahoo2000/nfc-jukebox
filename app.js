@@ -1,4 +1,5 @@
 import express from 'express'
+import fetch from 'node-fetch'
 import { NFC } from 'nfc-pcsc'
 import pretty from './pretty-logger.js'
 import { GetCurrentlyPlaying, GetRecentlyPlayed, GetTopTracks, GetDevices, PausePlayer, PlayPlayer } from './spotify.js'
@@ -32,13 +33,28 @@ app.get('/current', async (req, res) => {
     } = current
     const artistNames = artists.map((x) => x['name']).join(' - ')
     const albumArt = images[1]['url']
-    // console.log(name)
-    // console.log(artistNames)
-    // console.log(albumArt)
+    console.log(albumArt)
+    const albumArtData = await fetch(albumArt)
+    const albumArtBuffer = await albumArtData.arrayBuffer()
+    const aaBuffer = Buffer.from(albumArtBuffer)
+    const aaBufferHexString = Buffer.from(albumArtBuffer).toString('hex')
+
+    console.log(aaBufferHexString)
+
+    let bytez = []
+    for (var i = 0; i < aaBufferHexString.length; i += 2) {
+      let stringbyte = '0x' + aaBufferHexString[i] + '' + aaBufferHexString[i + 1]
+      bytez.push(stringbyte)
+    }
+    console.log(bytez)
+
     res.json({
       name,
       artistNames,
       albumArt,
+      // aaBuffer,
+      // aaBufferHexString,
+      bytez,
     })
   } catch (err) {
     console.log(`ERROR: `, err)
