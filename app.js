@@ -1,5 +1,6 @@
 import express from 'express'
 import fetch from 'node-fetch'
+import fs from 'fs'
 import { NFC } from 'nfc-pcsc'
 import pretty from './pretty-logger.js'
 import { GetCurrentlyPlaying, GetRecentlyPlayed, GetTopTracks, GetDevices, PausePlayer, PlayPlayer } from './spotify.js'
@@ -21,7 +22,36 @@ app.get('/currentlyplaying', async (req, res) => {
   }
 })
 
-app.get('/current', async (req, res) => {
+app.get('/currentWithBitmap', async (req, res) => {
+  try {
+    const resp = await GetCurrentlyPlaying()
+    const current = await resp.json()
+    const {
+      item: {
+        name,
+        album: { artists, images },
+      },
+    } = current
+    const artistNames = artists.map((x) => x['name']).join(' - ')
+    const albumArtURL = images[1]['url']
+    console.log({ name, artistNames, albumArtURL })
+
+    fetch(albumArtURL)
+      .then((res) => res.body.pipe(fs.createWriteStream('./albumArt.jpg')))
+      .catch((err) => console.log(err))
+
+    res.json({
+      name,
+      artistNames,
+      albumArtURL,
+    })
+  } catch (err) {
+    console.log(`ERROR: `, err)
+    res.json({ error: `get recently played failed` })
+  }
+})
+
+app.get('/currentWithBuffer', async (req, res) => {
   try {
     const resp = await GetCurrentlyPlaying()
     const current = await resp.json()
